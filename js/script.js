@@ -3,7 +3,7 @@ var scene;
 var elems = {};
 var settings = {
 	comet: {
-		when: 500,
+		when: 1500,
 		fadeInSpeed: 800,
 		moveDuration:2000,
 		moveExp: 4,
@@ -66,7 +66,10 @@ function __scene() {
     
     director.loop(30);
     
-    $("#loading").fadeOut(150, function() {});
+    $("#loading").css("opacity", 0);
+    setTimeout(function() {
+    	$("#loading").hide();
+    },1000);
 }
 
 function showComet(time) {
