@@ -1,25 +1,56 @@
-var director;
-var scene;
-var elems = {};
-var settings = {
-	comet: {
-		when: 1500,
-		fadeInSpeed: 800,
-		moveDuration:2000,
-		moveExp: 4,
-		fadeOutSpeed:1000,
-		startPos: { x:1324, y:170 }
+// DOM loads
+$(document).ready(function() {
+	var snowOpts = { shadow: true, round: true, minSize: 7, maxSize:10 };
+	//$("#container").snowfall(snowOpts);
+	$(window).resize();
+});
+
+// Everything else loads
+$(window).load(function() {
+	var settings = {
+		comet: {
+			when: 1500,
+			fadeInSpeed: 800,
+			moveDuration:2000,
+			moveExp: 4,
+			fadeOutSpeed:1000,
+			startPos: { x:1324, y:170 }
+		}
+	};
+	
+	__init(settings);
+}).resize(function() {
+	var win = $(window);
+	var winWidth = win.width();
+	var winHeight = win.height();
+	var canvas = document.getElementById('canvas');
+	var goodRatio = canvas.width / canvas.height;
+	var currentRatio = winWidth / winHeight;
+	var newW, newH;  
+	
+	if(currentRatio > goodRatio) {
+		newH = (winHeight - 20);
+		newW = newH * goodRatio; 
+	} else {
+		newW = (winWidth - 20);
+		newH = newW / goodRatio;
 	}
-};
+	 
+	canvas.style.width = newW + "px";
+	canvas.style.height = newH + "px";
+	canvas.style.top = ((winHeight - newH) / 2) + "px";
+	console.log("resize", newW, newH, winWidth, winHeight);
+});
 
-
-function __init() {
-	director = new CAAT.Director().initialize(
-        1920,
-        1080,
-        document.getElementById('canvas'));
-        
-    new CAAT.ImagePreloader().loadImages(
+function __init(settings) {
+	//CAAT.DEBUG=1;
+	var director = new CAAT.Director()
+		.initialize(
+	        1920,
+	        1080,
+	        document.getElementById('canvas'))
+		.enableResizeEvents(CAAT.Director.prototype.RESIZE_PROPORTIONAL);
+    /*new CAAT.ImagePreloader().loadImages(
         [
              {id:'border',    url:'imgs/border.png'},
              {id:'comet',    url:'imgs/comet.png'},
@@ -31,60 +62,61 @@ function __init() {
         function( counter, images ) {
 			console.log(counter, images);			
 			if(counter >= images.length) {
-	            director.setImagesCache(images);
-	            __scene();
-			}
+	            director.setImagesCache(images);*/
+	            __scene(director, settings);
+			/*}
         }
-    );	
+    );	*/
 }
 
-function __scene() {
-	scene = director.createScene();
-
-	var bottomLayerSprites = {
-		main: new CAAT.SpriteImage().initialize(director.getImage('main'), 1, 1),
+function __scene(director, settings) {
+	var elems = {};
+	var images = [
+		document.getElementById('comet'),
+		document.getElementById('seniai')
+	];
+	// Make images into sprites for CAAT
+	var sprites = {
+		comet: new CAAT.SpriteImage().initialize(document.getElementById('comet'), 1, 1),
+		seniai: new CAAT.SpriteImage().initialize(document.getElementById('seniai'), 1, 1),
+		/*main: new CAAT.SpriteImage().initialize(director.getImage('main'), 1, 1),
 		logo: new CAAT.SpriteImage().initialize(director.getImage('logo'), 1, 1),
-		border: new CAAT.SpriteImage().initialize(director.getImage('border'), 1, 1),
-	};
-	var topLayerSprites = {
-		seniai: new CAAT.SpriteImage().initialize(director.getImage('seniai'), 1, 1)
+		border: new CAAT.SpriteImage().initialize(director.getImage('border'), 1, 1),*/
 	};
 	
-	var cometImage = new CAAT.SpriteImage().initialize(director.getImage('comet'), 1, 1);
+	// Create the scene
+	var scene = director.createScene();
+	
+	// Initiate ector elements on the scene
     elems.comet = new CAAT.Actor()
-    	.setBackgroundImage(cometImage, true)
+    	.setBackgroundImage(sprites.comet, true)
     	.setAlpha(0);
-	showComet(settings.comet.when);		
+	showComet(elems.comet, settings.comet.when, settings);
+    elems.seniai = new CAAT.Actor()
+    	.setBackgroundImage(sprites.seniai, true);
     	
 	var addSpriteToScene = function(key,val) {
 		scene.addChild(new CAAT.Actor().setBackgroundImage(val, true));
 	};            
 	
-    $.each(bottomLayerSprites, addSpriteToScene); 
+    //$.each(bottomLayerSprites, addSpriteToScene);
+    //$.each(topLayerSprites, addSpriteToScene);
+    	
     scene.addChild(elems.comet);
-    $.each(topLayerSprites, addSpriteToScene);
+    scene.addChild(elems.seniai);
     
     director.loop(30);
-    
     $("#loading").css("opacity", 0);
     setTimeout(function() {
     	$("#loading").hide();
     },1000);
 }
 
-function showComet(time) {
+function showComet(comet, time, settings) {
 	var s = settings.comet;
-	var comet = elems.comet;
 	comet.setLocation( s.startPos.x, s.startPos.y );
-    	/*.addBehavior(
-                    new CAAT.ScaleBehavior().
-                        setFrameTime(scene.time, cometScale).
-                        setValues( 1,5, 1,5 ).
-                        setInterpolator(
-                            new CAAT.Interpolator().createExponentialInInterpolator(
-                                3,
-                                false)
-                        ))*/
+	
+	// animation definitions
     var aFadeIn = new CAAT.AlphaBehavior().
             setFrameTime(time, s.fadeInSpeed).
             setValues( 0, 1 ).
@@ -113,6 +145,7 @@ function showComet(time) {
             );                 
           
             
+    // linking animations between them selves
     aFadeIn.addListener({
         behaviorExpired : function(behavior, time, actor) {
             aPath.setFrameTime(time, s.moveDuration);
@@ -122,6 +155,7 @@ function showComet(time) {
             aFadeOut.setFrameTime(time, s.fadeOutSpeed);
         }});        
         
+    // linking animations to the comet
 	comet.addBehavior( aFadeIn );
 	comet.addBehavior( aFadeOut );
 	comet.addBehavior( aPath );
@@ -154,23 +188,12 @@ function showComet(time) {
                     })
             );*/
            
-    var tmp = new CAAT.PathActor().
+    /*var tmp = new CAAT.PathActor().
 	    setBounds(0,0,director.width,director.height).
 	    create().
 	    setPath(path).
 	    setInteractive(true);
-	       		
-   	scene.addChild(tmp);
-
+   	scene.addChild(tmp);*/
 	
+	return comet;        		
 }
-
-// DOM loads
-$(document).ready(function() {
-	$("#container").snowfall({
-		shadow: true, round: true, minSize: 7, maxSize:10 });
-	__init();
-});
-
-// Everything else loads
-$(window).load(function() {});

@@ -21,16 +21,26 @@ body {
 }
 
 #container {
-	position:fixed;
+	position:absolute;
 	height:100%;
 	width:100%;
 }
 #canvas {
+	background-image: url('../imgs/bg-9.jpg');
+	background-repeat:no-repeat;
+	background-position:center center;
+	-webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../imgs/bg-9.jpg', sizingMethod='scale');
+    -ms-filter: "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../imgs/bg-9.jpg', sizingMethod='scale')";
+    zoom:1;
+    background-size: cover;
 	margin:0 auto;
 	position:relative;
-	top:2%;
 	display: block;
-	height:96%;
+	/*min-width:840px;
+	min-height:472px;*/
 }
 
 .resources { display: none; } 
