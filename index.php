@@ -22,7 +22,12 @@
 	<title>PZU Sveikinimas</title>
 </head>
 <body>
-<div id='loading'></div>
+<div id='loading'>
+	kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi...
+	kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi...
+	kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi...
+	kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi... kraunasi...
+</div>
 <div id="container">
 	<div class='resources'>
 		<img src="imgs/comet-ltr.png" id="comet" />
