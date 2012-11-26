@@ -8,7 +8,7 @@ body {
 #loading {
 	top:0; left:0;
 	overflow:hidden;
-	background:#89a9b0;
+	background:#FFF;
 	position:absolute;
 	height:100%;
 	width:100%;
@@ -20,6 +20,7 @@ body {
 	-o-transition: opacity 1s ease-in-out;
 	-ms-transition: opacity 1s ease-in-out;
 	transition: opacity 1s ease-in-out;
+	background-image: url('../imgs/loading.gif') 50% 50%;
 }
 
 #container {
