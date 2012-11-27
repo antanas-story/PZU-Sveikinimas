@@ -1,5 +1,20 @@
+var audio = {};
 // DOM loads
 $(document).ready(function() {
+	var soundFormat =	Modernizr.audio.mp3 ? "mp3" :
+						Modernizr.audio.ogg ? "ogg" : "m4a";
+	
+	audio.music = new Audio();
+	audio.music.src = 'sound/music.'+soundFormat;
+	audio.music.volume = 0.8;
+	audio.music.loop = true;
+	audio.music.load();
+	
+	audio.greeting = new Audio();
+	audio.greeting.src = 'sound/sveikinimas.'+soundFormat;
+	audio.greeting.volume = 0.6;
+	audio.greeting.load();
+	            
 	$(window).resize();
 });
 
@@ -117,8 +132,8 @@ function __init(settings) {
 	        1920,
 	        1080,
 	        document.getElementById('canvas'))
-	    .addAudio('music', document.getElementById('music'))
-	    .addAudio('sveikinimas', document.getElementById('sveikinimas'))
+	    /*.addAudio('music', document.getElementById('music'))
+	    .addAudio('sveikinimas', document.getElementById('sveikinimas'))*/
 		.enableResizeEvents(CAAT.Director.prototype.RESIZE_PROPORTIONAL);
     /*new CAAT.ImagePreloader().loadImages(
         [
@@ -184,8 +199,7 @@ function __scene(director, settings) {
                 0,
                 settings.sound.musicAt,
                 function(scene_time, timer_time, timertask_instance)  {   // timeout
-    				director.setVolume('music', settings.sound.musicVolume);
-    				director.audioLoop('music');
+                	audio.music.play();
                 },
                 function(scene_time, timer_time, timertask_instance)  {   // tick
                 },
@@ -196,8 +210,7 @@ function __scene(director, settings) {
                 0,
                 settings.sound.greetingAt,
                 function(scene_time, timer_time, timertask_instance)  {   // timeout
-                    director.setVolume('sveikinimas', settings.sound.greetingVolume);
-                    director.audioPlay('sveikinimas');
+                	audio.greeting.play();
                 },
                 function(scene_time, timer_time, timertask_instance)  {   // tick
                 },
