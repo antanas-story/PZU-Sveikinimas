@@ -3,10 +3,11 @@ To-Do List
 
 Antanas
 -------
-1. Hohoho senio burnos judėjimas (Kartu su 2.)
-2. Muzika (Compatibility pataisytas, reikia garsų ir timingų) 
-3. Kometa 
-4. Lemputes (DONE)
+1. Garsai compatibility (DONE)
+2. Muzikos ir sveikinimo timing'ai (Užklausta)
+3. Hohoho senio burnos judėjimas (Kartu su 2.) 
+4. Kometa  (DONE)
+5. Lemputes (DONE)
 
 Ambu
 ----

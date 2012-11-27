@@ -29,14 +29,15 @@ $(window).load(function() {
 		},
 		comet: {
 			when: 2500,
-			fadeInSpeed: 800,
-			moveDuration:2500,
-			moveExp: 4,
-			fadeOutSpeed:1200,
+			interval: 10000,
+			fadeInSpeed: 1000,
+			moveDuration:4500,
+			moveInterpolator: new CAAT.Interpolator().createExponentialOutInterpolator(2,false),
+			fadeOutSpeed:2000,
 			
 			// comet path ltr
-			startPos: { x:300, y:70 },
-			path: { x0:400,y0:20, x1:900,y1:20, x2:1224,y2:130}
+			startPos: { x:145, y:300 },
+			path: { x0:550,y0:-80, x1:1050,y1:-80, x2:1500,y2:350}
 			// comet path rtl 
 			/*startPos: { x:1324, y:170 },
 			path: { x0:900,y0:20, x1:400,y1:20, x2:300,y2:50 }*/
@@ -341,12 +342,14 @@ function showComet(comet, time, settings) {
 	            addCubicTo( s.path.x0,s.path.y0, s.path.x1,s.path.y1, s.path.x2,s.path.y2 ).
 	            endPath();
     var aPath = new CAAT.PathBehavior().
-            //setAutoRotate(false,true).
+    		setFrameTime(time, s.moveDuration).
+            setAutoRotate(true).
             setPath( path ).
             setInterpolator(
-                new CAAT.Interpolator().createExponentialInInterpolator(s.moveExp,false) );
+                s.moveInterpolator );
                 
 	var aFadeOut = new CAAT.AlphaBehavior().
+			setFrameTime(time+s.moveDuration-s.fadeOutSpeed, s.fadeOutSpeed).
             setValues( 1, 0 ).
             setInterpolator(
                 new CAAT.Interpolator().createExponentialInInterpolator(
@@ -356,19 +359,19 @@ function showComet(comet, time, settings) {
           
             
     // linking animations between them selves
-    aFadeIn.addListener({
+    /*aFadeIn.addListener({
         behaviorExpired : function(behavior, time, actor) {
             aPath.setFrameTime(time, s.moveDuration);
-        }});
-    aPath.addListener({
+        }});*/
+    /*aPath.addListener({
         behaviorExpired : function(behavior, time, actor) {
             aFadeOut.setFrameTime(time, s.fadeOutSpeed);
-        }});        
+        }});*/        
         
     // linking animations to the comet
+	comet.addBehavior( aPath );
 	comet.addBehavior( aFadeIn );
 	comet.addBehavior( aFadeOut );
-	comet.addBehavior( aPath );
 
         /*.set
             setImage(director.getImage('comet')).
