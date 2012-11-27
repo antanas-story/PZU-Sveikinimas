@@ -27,14 +27,15 @@ $(window).load(function() {
 			path: { x0:900,y0:20, x1:400,y1:20, x2:300,y2:50 }*/
 		},
 		toys: {
-			blinkDelay:100,// kiek uzdelsti po uzkrovimo pries pradedant spiginti 
-			blinkSpeed:280, // kiek laiko uzsilaiko uzdegta lempute
-			blinkRandom:100, // blinkSpeed varijuoja 0-blinkRandom kiekvienai eglutei
+			blinkDelay:1000,// kiek uzdelsti po uzkrovimo pries pradedant spiginti 
+			blinkSpeed:800, // kiek laiko uzsilaiko uzdegta lempute
+			//blinkRandom:100, // blinkSpeed varijuoja 0-blinkRandom kiekvienai eglutei
 			blinkGap:0,	// po kiek laiko uzgesus lemputei uzsidega kita
 			blinkFade:0,	// kiek laiko trunka fadeIn/fadeOut'ai
 			// bendras laikas vineai lemputei:
 			// blinkSpeed + blinkRandom + blinkGap + blinkFade * 2
 			// 200 + 50 + 30 + 40*2 = 360
+			lampsPerTree:3,
 			trees: [
 				[ // didziausia eglute
 					{ x: 421, y: 921, size:25 }, // pirmas kairej apacioj
@@ -211,10 +212,22 @@ function __scene(director, settings) {
     },1000);
 }
 
+function generateRandomNumbers(howMany, maxNumber) {
+	var arr = new Array();
+	while(arr.length < howMany){
+	  var randomnumber = Math.ceil(Math.random()*maxNumber);
+	  var found=false;
+	  for(var i=0;i<arr.length;i++){
+	    if(arr[i]==randomnumber){found=true;break}
+	  }
+	  if(!found) arr[arr.length]=randomnumber-1;
+	}
+	return arr;
+}
+
 function showToys(scene, sprite, settings) {
 	// first toy and others chained to blink
-	var toySettings = settings.toys,
-		trees = toySettings.trees;
+	var toySettings = settings.toys;
 		
 	var positionToy = function(actor, info) {
 		var x = info.x - 30,
@@ -224,53 +237,59 @@ function showToys(scene, sprite, settings) {
 			.centerOn(x, y)
 			.setScale(size, size);
 	}
+	
+	
 		
-	for(var i = 0; i < trees.length; i++) {
-	//var i = 0;
-		(function(toys, toySettings) {
-			var j = 0;
-			var actor = new CAAT.Actor()
-		    	.setBackgroundImage(sprite, true)
-		    	.setAlpha(0);
-		    positionToy(actor, toys[j]);
-		    //toySettings.blinkGap
-		    //toySettings.blinkFade
-	        var speed = parseInt(toySettings.blinkSpeed + Math.random()*toySettings.blinkRandom);
-			var fadeIn = new CAAT.AlphaBehavior().
-					setFrameTime(toySettings.blinkDelay, toySettings.blinkFade).
-		            setValues( 0, 1 )/*.
-		            setInterpolator(
-		                new CAAT.Interpolator().createExponentialInInterpolator(
-		                    4,
-		                    false)
-		            )*/;
-		   	var fadeOut = new CAAT.AlphaBehavior().
-		            setValues( 1, 0 )/*.
-		            setInterpolator(
-		                new CAAT.Interpolator().createExponentialInInterpolator(
-		                    4,
-		                    false)
-		            )*/;                 
-	          
-	            
-		    // pasibaigus fadeIn, palaukti ir paleisti fadeOut
-		    fadeIn.addListener({
-		        behaviorExpired : function(behavior, time, actor) {
-		            fadeOut.setFrameTime(time+speed, toySettings.blinkFade);
-		        }});
-		    // pasibaigus fadeOut palaukti ir paleisti fadeIn tik jau
-		    // sekanciam zaislui	    
-		    fadeOut.addListener({
-		        behaviorExpired : function(behavior, time, actor) {
-		        	j = ( j+1 == toys.length ? 0 : j+1 ); 
-		        	positionToy(actor, toys[j]);
-		            fadeIn.setFrameTime(time+toySettings.blinkGap, toySettings.blinkFade);
-		        }});
-		        	
-	    	actor.addBehavior( fadeIn );
-	    	actor.addBehavior( fadeOut );
-		   	scene.addChild(actor);
-		}) ( trees[i], toySettings );
+	var spawnToys = function(treeNumber, time, previous) {
+		//var speed = Math.ceil(toySettings.blinkSpeed + Math.random()*toySettings.blinkRandom);
+		var toysFiltered = toySettings.trees[treeNumber];
+		if(previous!=undefined) {
+			toysFiltered = $.grep(toysFiltered, function(val, key) {
+				return $.inArray(key, previous) < 0;	
+			});
+		}
+		var random = generateRandomNumbers(toySettings.lampsPerTree, toysFiltered.length);
+		
+		for(var i = 0; i < random.length; i++) {
+			(function(toy, settings) {
+				if(toy==undefined) {
+					console.log("toy=undefined", random, toy, settings)
+					return;
+				}
+				var actor = new CAAT.Actor()
+			    	.setBackgroundImage(sprite, true)
+			    	.setAlpha(0)
+			    	.setDiscardable(true)
+			    	.setFrameTime(time, time+settings.blinkSpeed+settings.blinkFade);
+			    positionToy(actor, toy);
+			    // fade in leisti iskart
+				var fadeIn = new CAAT.AlphaBehavior().
+						setFrameTime(time, settings.blinkFade).
+			            setValues( 0, 1 );
+			    // fade out leisti veliau
+			   	var fadeOut = new CAAT.AlphaBehavior().
+			            setValues( 1, 0 );                 
+		          
+		        // pasibaigus fadeIn, palaukti ir paleisti fadeOut
+			    fadeIn.addListener({
+			        behaviorExpired : function(behavior, time, actor) {
+			            fadeOut.setFrameTime(time+settings.blinkSpeed, settings.blinkFade);
+			        }});
+			    // pasibaigus fadeOut uzsukti rekursyvuma
+			    if(i==0)	    
+				    fadeOut.addListener({
+				        behaviorExpired : function(behavior, time, actor) {
+				            spawnToys(treeNumber, time+settings.blinkGap, random);
+				        }});			        	
+		    	actor.addBehavior( fadeIn );
+		    	actor.addBehavior( fadeOut );
+			   	scene.addChild(actor);
+			})(toysFiltered[ random[i] ], toySettings);
+	   	}
+	};
+	
+	for(var i = 0; i < toySettings.trees.length; i++) {
+		spawnToys(i, toySettings.blinkDelay);
 	}
 	
 	// all toys on all trees
