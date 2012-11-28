@@ -26,14 +26,7 @@
 		<img src="imgs/comet-ltr.png" id="comet" />
 		<img src="imgs/seniai.png" id="seniai" />
 		<img src="imgs/tree-toy.png" id="toy" />
-		<!--<audio preload='auto' id='music'>
-			<source src='sound/music.ogg' type="audio/ogg" />
-			<source src='sound/music.mp3' type="audio/mpeg" />
-		</audio>
-        <audio preload='auto' id='sveikinimas'>
-        	<source src='sound/sveikinimas.ogg' type="audio/ogg" />
-        	<source src='sound/sveikinimas.mp3' type="audio/mpeg" />
-        </audio>-->
+		<img src="imgs/mouth.png" id="mouth" />
 	</div>	
 	<canvas id="canvas" width="1920" height="1080"></canvas>
 </div>

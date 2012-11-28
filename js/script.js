@@ -1,34 +1,37 @@
-var audio = {};
+var sound;
 // DOM loads
 $(document).ready(function() {
 	var soundFormat =	Modernizr.audio.mp3 ? "mp3" :
 						Modernizr.audio.ogg ? "ogg" : "m4a";
 	
-	audio.music = new Audio();
-	audio.music.src = 'sound/music.'+soundFormat;
-	audio.music.volume = 0.8;
-	audio.music.loop = true;
-	audio.music.load();
+	sound = new Audio();
+	sound.src = 'sound/sound_no_reverb.'+soundFormat;
+	sound.volume = 0.8;
+	//sound.loop = true;
+	sound.load();
 	
-	audio.greeting = new Audio();
-	audio.greeting.src = 'sound/sveikinimas.'+soundFormat;
-	audio.greeting.volume = 0.6;
-	audio.greeting.load();
-	            
 	$(window).resize();
 });
 
 // Everything else loads
 $(window).load(function() {
 	var settings = {
+		mouth: {
+			at:[0, 35600],
+			openClose:[
+				// laikai nuo kada atidaryta, iki kada uzdaryti reliatyviai pagal garso pradzia
+				[10900, 11050],
+				[11200, 11350],
+				[11500, 11650],
+				[11850, 12000],
+				[12200, 13000]
+			]
+		},
 		sound: {
-			musicAt:500,
-			musicVolume:0.80,
-			greetingAt:1500,
-			greetingVolume:0.60
+			soundAt:500
 		},
 		comet: {
-			when: 2500,
+			at: [2500, 15000, 30000, 45000],
 			interval: 10000,
 			fadeInSpeed: 1000,
 			moveDuration:4500,
@@ -133,40 +136,24 @@ function __init(settings) {
 	        1920,
 	        1080,
 	        document.getElementById('canvas'))
-	    /*.addAudio('music', document.getElementById('music'))
-	    .addAudio('sveikinimas', document.getElementById('sveikinimas'))*/
 		.enableResizeEvents(CAAT.Director.prototype.RESIZE_PROPORTIONAL);
-    /*new CAAT.ImagePreloader().loadImages(
-        [
-             {id:'border',    url:'imgs/border.png'},
-             {id:'comet',    url:'imgs/comet.png'},
-             {id:'logo',    url:'imgs/logo.png'},
-             {id:'main',    url:'imgs/main.png'},
-             {id:'seniai',    url:'imgs/seniai.png'},
-             {id:'tree-toy',    url:'imgs/tree-toy.png'}
-        ],
-        function( counter, images ) {
-			console.log(counter, images);			
-			if(counter >= images.length) {
-	            director.setImagesCache(images);*/
-	            __scene(director, settings);
-			/*}
-        }
-    );	*/
+    __scene(director, settings);
 }
 
 function __scene(director, settings) {
 	var elems = {};
-	var images = [
+	/*var images = [
 		document.getElementById('comet'),
 		document.getElementById('seniai'),
-		document.getElementById('toy')
-	];
+		document.getElementById('toy'),
+		document.getElementById
+	];*/
 	// Make images into sprites for CAAT
 	var sprites = {
 		comet: new CAAT.SpriteImage().initialize(document.getElementById('comet'), 1, 1),
 		seniai: new CAAT.SpriteImage().initialize(document.getElementById('seniai'), 1, 1),
 		toy: new CAAT.SpriteImage().initialize(document.getElementById('toy'), 1, 1),
+		mouth: new CAAT.SpriteImage().initialize(document.getElementById('mouth'), 1, 1),
 		/*main: new CAAT.SpriteImage().initialize(director.getImage('main'), 1, 1),
 		logo: new CAAT.SpriteImage().initialize(director.getImage('logo'), 1, 1),
 		border: new CAAT.SpriteImage().initialize(director.getImage('border'), 1, 1),*/
@@ -175,57 +162,68 @@ function __scene(director, settings) {
 	// Create the scene
 	var scene = director.createScene();
 	
-	// Initiate ector elements on the scene
+	// kometa
     elems.comet = new CAAT.Actor()
     	.setBackgroundImage(sprites.comet, true)
     	.setAlpha(0);
-	showComet(elems.comet, settings.comet.when, settings);
+    for(var i = 0; i < settings.comet.at.length; i++) {
+		showComet(elems.comet, settings.comet.at[i], settings);
+	}
+	// seniu virsutinis sluoksnis
     elems.seniai = new CAAT.Actor()
     	.setBackgroundImage(sprites.seniai, true);
-    	
-	var addSpriteToScene = function(key,val) {
-		scene.addChild(new CAAT.Actor().setBackgroundImage(val, true));
-	};
-	
+    // burna
+	elems.mouth = new CAAT.Actor()
+    	.setBackgroundImage(sprites.mouth, true)
+    	.setAlpha(0);
+    showMouth(elems.mouth, settings);    	
+    // zaisliukai
 	showToys(scene, sprites.toy, settings);
 	
-    //$.each(bottomLayerSprites, addSpriteToScene);
-    //$.each(topLayerSprites, addSpriteToScene);
-    	
     scene.addChild(elems.comet);
     scene.addChild(elems.seniai);
+    scene.addChild(elems.mouth);
     
  	
-    scene.createTimer(
-                0,
-                settings.sound.musicAt,
-                function(scene_time, timer_time, timertask_instance)  {   // timeout
-                	audio.music.play();
+    scene.createTimer(0, settings.sound.soundAt,// nuo, iki
+    			// args - scene_time, timer_time, timertask_instance
+                function(sceneTime, timerTime, timerTask)  {   // timeout
+                	sound.play();
                 },
-                function(scene_time, timer_time, timertask_instance)  {   // tick
+                function(s,t,tt)  {   // tick
                 },
-                function(scene_time, timer_time, timertask_instance)  {   // cancel
+                function(s,t,tt)  {   // cancel
                 }
 	);
-	scene.createTimer(
-                0,
-                settings.sound.greetingAt,
-                function(scene_time, timer_time, timertask_instance)  {   // timeout
-                	audio.greeting.play();
-                },
-                function(scene_time, timer_time, timertask_instance)  {   // tick
-                },
-                function(scene_time, timer_time, timertask_instance)  {   // cancel
-                }
-	)            
     
+    // start at 30 fps
     director.loop(30);
+    
+    // hide loading div after starting
     $("#loading").css("opacity", 0);
     setTimeout(function() {
     	$("#loading").hide();
     },1000);
 }
-
+function showMouth(mouthActor, settings) {
+	for(var j = 0; j < settings.mouth.at.length; j++) {
+		var offset = settings.mouth.at[j] + settings.sound.soundAt;
+		for(var i = 0; i < settings.mouth.openClose.length; i++) {
+			var open = settings.mouth.openClose[i][0]+offset;
+			var close = settings.mouth.openClose[i][1]+offset;
+			mouthActor.addBehavior(
+				new CAAT.AlphaBehavior().
+					setFrameTime(open, 1).
+		            setValues( 0, 1 )
+			);
+			mouthActor.addBehavior(
+				new CAAT.AlphaBehavior().
+					setFrameTime(close, 1).
+		            setValues( 1, 0 )
+			);
+		}
+	}
+}
 function generateRandomNumbers(howMany, maxNumber) {
 	var arr = new Array();
 	while(arr.length < howMany){
