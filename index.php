@@ -29,6 +29,10 @@
 		<img src="imgs/mouth.png" id="mouth" />
 	</div>	
 	<canvas id="canvas" width="1920" height="1080"></canvas>
+	<div id="fund-raiser">
+		<span>Piešinį dovanoja A. Adamkienės labdaros ir paraamos fondas</span>
+		<img src="imgs/fondo_logotipas.jpg" alt="" />
+	</div>
 </div>
 </body>
 </html>

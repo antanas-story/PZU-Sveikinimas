@@ -46,5 +46,19 @@ body {
 	/*min-width:840px;
 	min-height:472px;*/
 }
+#fund-raiser {
+	margin:0 auto;
+	width:430px;
+	line-height:40px;
+	font-size:13px;
+	color:#2e789f;
+	font-family: Arial, Helvetica, sans-serif;
+}
+#fund-raiser img {
+	float:right;
+	width:70px;
+	height:40px;
+}
+
 
 .resources { display: none; } 

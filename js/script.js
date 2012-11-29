@@ -116,16 +116,16 @@ $(window).load(function() {
 	var newW, newH;  
 	
 	if(currentRatio > goodRatio) {
-		newH = (winHeight - 20);
+		newH = (winHeight - 30);
 		newW = newH * goodRatio; 
 	} else {
-		newW = (winWidth - 20);
+		newW = (winWidth - 30);
 		newH = newW / goodRatio;
 	}
 	 
 	container.style.width = newW + "px";
 	container.style.height = newH + "px";
-	container.style.top = ((winHeight - newH) / 2) + "px";
+	container.style.top = ((winHeight - newH) / 2)-15 + "px";
 	console.log("resize", newW, newH, winWidth, winHeight);
 });
 
