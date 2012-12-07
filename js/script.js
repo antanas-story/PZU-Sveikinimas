@@ -1,14 +1,21 @@
 var sound;
 // DOM loads
 $(document).ready(function() {
-	var soundFormat =	Modernizr.audio.mp3 ? "mp3" :
+	if(!ie) {
+		MediaElement('sound', {success: function(me) {
+			sound = me;
+		}});
+	} else {
+		
+	}
+	/*var soundFormat =	Modernizr.audio.mp3 ? "mp3" :
 						Modernizr.audio.ogg ? "ogg" : "m4a";
 	
 	sound = new Audio();
-	sound.src = 'sound/sound_no_reverb.'+soundFormat;
+	sound.src = 'sound/sound.'+soundFormat;
 	sound.volume = 0.8;
 	//sound.loop = true;
-	sound.load();
+	sound.load();*/
 	
 	$(window).resize();
 });
@@ -17,7 +24,7 @@ $(document).ready(function() {
 $(window).load(function() {
 	var settings = {
 		mouth: {
-			at:[0, 35600],
+			at:[7200],
 			openClose:[
 				// laikai nuo kada atidaryta, iki kada uzdaryti reliatyviai pagal garso pradzia
 				[10900, 11050],
@@ -28,7 +35,7 @@ $(window).load(function() {
 			]
 		},
 		sound: {
-			soundAt:500
+			soundAt:1000
 		},
 		comet: {
 			at: [2500, 15000, 30000, 45000],
@@ -104,7 +111,44 @@ $(window).load(function() {
 		}
 	};
 	
-	__init(settings);
+	var startSnow = function(flakes) {
+		$("#container").snowfall({ shadow: true, round: true, minSize: 7, maxSize:10,
+				flakeIndex:150, flakeCount:flakes });		
+	};
+	if(ie) {
+		$("#loading").hide();
+		startSnow(30);
+		return;
+	}
+	
+	var director = __init(settings);
+	var start = function() {
+		// start at 30 fps
+	    director.loop(30);
+	    
+	    // hide loading div after starting
+	    $("#loading").css("opacity", 0);
+	    setTimeout(function() {
+	    	$("#loading").hide();
+	    },1000);
+	};
+	
+	if (Modernizr.touch || /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
+		var flag = false;
+		startSnow(15);
+		$("#loading").addClass('loaded').bind('touchstart click', function(){
+		  if (!flag) {
+		    flag = true;
+		    sound.play();
+		    sound.pause();
+		    start();
+		  }
+		  return false;
+		});
+	} else {
+		startSnow(35);
+		start();
+	}
 }).resize(function() {
 	var win = $(window);
 	var winWidth = win.width();
@@ -116,10 +160,10 @@ $(window).load(function() {
 	var newW, newH;  
 	
 	if(currentRatio > goodRatio) {
-		newH = (winHeight - 30);
+		newH = (winHeight - 60);
 		newW = newH * goodRatio; 
 	} else {
-		newW = (winWidth - 30);
+		newW = (winWidth - 40);
 		newH = newW / goodRatio;
 	}
 	 
@@ -138,6 +182,7 @@ function __init(settings) {
 	        document.getElementById('canvas'))
 		.enableResizeEvents(CAAT.Director.prototype.RESIZE_PROPORTIONAL);
     __scene(director, settings);
+	return director;
 }
 
 function __scene(director, settings) {
@@ -176,7 +221,6 @@ function __scene(director, settings) {
 	elems.mouth = new CAAT.Actor()
     	.setBackgroundImage(sprites.mouth, true)
     	.setAlpha(0);
-    showMouth(elems.mouth, settings);    	
     // zaisliukai
 	showToys(scene, sprites.toy, settings);
 	
@@ -184,11 +228,11 @@ function __scene(director, settings) {
     scene.addChild(elems.seniai);
     scene.addChild(elems.mouth);
     
- 	
     scene.createTimer(0, settings.sound.soundAt,// nuo, iki
     			// args - scene_time, timer_time, timertask_instance
                 function(sceneTime, timerTime, timerTask)  {   // timeout
-                	sound.play();
+					sound.play();       		
+					showMouth(scene, elems.mouth, settings);                 	
                 },
                 function(s,t,tt)  {   // tick
                 },
@@ -196,18 +240,10 @@ function __scene(director, settings) {
                 }
 	);
     
-    // start at 30 fps
-    director.loop(30);
-    
-    // hide loading div after starting
-    $("#loading").css("opacity", 0);
-    setTimeout(function() {
-    	$("#loading").hide();
-    },1000);
 }
-function showMouth(mouthActor, settings) {
+function showMouth(scene, mouthActor, settings) {
 	for(var j = 0; j < settings.mouth.at.length; j++) {
-		var offset = settings.mouth.at[j] + settings.sound.soundAt;
+		var offset = settings.mouth.at[j] + scene.time;
 		for(var i = 0; i < settings.mouth.openClose.length; i++) {
 			var open = settings.mouth.openClose[i][0]+offset;
 			var close = settings.mouth.openClose[i][1]+offset;

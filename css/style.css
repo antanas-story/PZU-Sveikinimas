@@ -7,21 +7,21 @@ body {
 
 #loading {
 	top:0; left:0;
-	overflow:hidden;
-	background:#FFF;
 	position:absolute;
 	height:100%;
 	width:100%;
 	font-size:100px;
 	color: #94b0b7;
-	z-index:100;
+	z-index:200;
+	background:#FFF url('../imgs/loading.gif') no-repeat 50% 50%;
+	display:block;
 	-webkit-transition: opacity 1s ease-in-out;
 	-moz-transition: opacity 1s ease-in-out;
 	-o-transition: opacity 1s ease-in-out;
 	-ms-transition: opacity 1s ease-in-out;
 	transition: opacity 1s ease-in-out;
-	background-image: url('../imgs/loading.gif') 50% 50%;
 }
+#loading.loaded { background-image:url('../imgs/play.png'); } 
 
 #container {
 	height:100%;
@@ -46,19 +46,19 @@ body {
 	/*min-width:840px;
 	min-height:472px;*/
 }
-#fund-raiser {
-	margin:0 auto;
-	width:430px;
+#ielte8 #canvas { display:none; }
+#picOriginWrap {
+	text-align:center;
+}
+#picOrigin {
+	display:inline-block;
 	line-height:40px;
+	height:40px;
+	padding-right:90px;
 	font-size:13px;
 	color:#2e789f;
 	font-family: Arial, Helvetica, sans-serif;
+	background:url('../imgs/fondo_logotipas.jpg') no-repeat center right;
 }
-#fund-raiser img {
-	float:right;
-	width:70px;
-	height:40px;
-}
-
 
 .resources { display: none; } 
